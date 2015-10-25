@@ -374,6 +374,8 @@ object project3 {
 
       case Update_Finger_table_request(s, i) =>
       if(joining == true) {
+//        println("@@@@@@@@@@@@@ Hiihihihihih")
+//        Thread.sleep(100000)
         sender ! Update_Finger_table_response(true)
       }
       else {
@@ -535,8 +537,8 @@ object project3 {
           val init_Finger_Table_future : Future[Init_Finger_Table_response] = (NodeIDtoActorRef(MyparentID) ? Init_Finger_Table_request(nodeID)).mapTo[Init_Finger_Table_response]
           val init_Finger_table_result = Await.result(init_Finger_Table_future,TimeoutDuration.duration)
 //          log.info("@@@@@***********************************")
-//          log.info(init_Finger_table_result.Finger_table.foreach(println(_)).toString)
-
+////          log.info(init_Finger_table_result.Finger_table.foreach(println(_)).toString)
+//
 //          Thread.sleep(10000)
           val setFinger_table_future : Future[SetFinger_tableRsp] = (NodeIDtoActorRef(MyparentID) ? SetFinger_tableReq(init_Finger_table_result.Finger_table)).mapTo[SetFinger_tableRsp]
           val setFinger_table_result = Await.result(setFinger_table_future,TimeoutDuration.duration)
@@ -587,12 +589,19 @@ object project3 {
           println(MyparentID + " -------@@@@@@@@------- " + nminus2tothepower1minus1)
 
 //          Thread.sleep(10000)
-          val p_future : Future [Find_predecessor_response] = (NodeIDtoActorRef(MyparentID) ? Find_predecessor_request(nminus2tothepower1minus1)).mapTo[Find_predecessor_response]
-//val p_future : Future [Find_predecessor_response] = (NodeIDtoActorRef(MyparentID) ? Find_predecessor_request(0)).mapTo[Find_predecessor_response]
-          val p_result = Await.result(p_future,TimeoutDuration.duration)
+          var p: Long = nminus2tothepower1minus1
 
-          val p : Long = p_result.nodeID
-          log.info("pppppp: " +p)
+          if(Nodes.indexWhere(node => {node._1 == p}) == -1) {
+
+            val p_future: Future[Find_predecessor_response] = (NodeIDtoActorRef(MyparentID) ? Find_predecessor_request(p)).mapTo[Find_predecessor_response]
+            //val p_future : Future [Find_predecessor_response] = (NodeIDtoActorRef(MyparentID) ? Find_predecessor_request(7)).mapTo[Find_predecessor_response]
+            val p_result = Await.result(p_future, TimeoutDuration.duration)
+
+            p = p_result.nodeID
+
+          }
+
+//          log.info("pppppp: " +p)
 //          Thread.sleep(10000)
           val update_Finger_table_future : Future[Update_Finger_table_response] = (NodeIDtoActorRef(p) ? Update_Finger_table_request(MyparentID,i)).mapTo[Update_Finger_table_response]
           val update_Finger_table_result = Await.result(update_Finger_table_future,TimeoutDuration.duration)
@@ -621,7 +630,7 @@ object project3 {
         MyparentID = nodeID
 
       case Update_Finger_table_request(nodeID: Long, i:Int) =>
-        log.info("Atttttttt theeeeeee update finger table request "+nodeID.toString+" "+i.toString)
+        log.info("Atttttttt theeeeeee update finger table request "+nodeID.toString+" "+i.toString +"My pArent ID" + MyparentID)
 
 //        Thread.sleep(100000)
 
@@ -896,9 +905,9 @@ object project3 {
         println("Maximum_number of nodes allowed " + max_number_of_nodes )
 
         val NodeRef1 = MyActorSystem.actorOf(Props(new Node), name = 0.toString)
-        val NodeRef2 = MyActorSystem.actorOf(Props(new Node), name = 1.toString)
-        val NodeRef3 = MyActorSystem.actorOf(Props(new Node), name = 3.toString)
-        val NodeRef4 = MyActorSystem.actorOf(Props(new Node), name = 6.toString)
+        val NodeRef2 = MyActorSystem.actorOf(Props(new Node), name = 3.toString)
+        val NodeRef3 = MyActorSystem.actorOf(Props(new Node), name = 4.toString)
+        val NodeRef4 = MyActorSystem.actorOf(Props(new Node), name = 13.toString)
 
         Nodes += {(0,NodeRef1)}
         Nodes += {(3,NodeRef2)}
@@ -915,34 +924,34 @@ object project3 {
         val threesfingertable : Array[(Long,Long)] = new Array[(Long, Long)](m)
         val sixsfingertable  : Array[(Long,Long)] = new Array[(Long, Long)](m)
 
-        zerossfingeratable(0) = {(1,3)}
-        zerossfingeratable(1) = {(2,3)}
-        zerossfingeratable(2) = {(4,4)}
-        zerossfingeratable(3) = {(8,0)}
-////
-        onesfingertable(0) = {(4,4)}
-        onesfingertable(1) = {(5,0)}
-        onesfingertable(2) = {(7,0)}
-        onesfingertable(3) = {(11,0)}
+//        zerossfingeratable(0) = {(1,3)}
+//        zerossfingeratable(1) = {(2,3)}
+//        zerossfingeratable(2) = {(4,0)}
+//        zerossfingeratable(3) = {(8,0)}
+////////
+//        onesfingertable(0) = {(4,0)}
+//        onesfingertable(1) = {(5,0)}
+//        onesfingertable(2) = {(7,0)}
+//        onesfingertable(3) = {(11,0)}
 //
-        threesfingertable(0) = {(5,0)}
-        threesfingertable(1) = {(6,0)}
-        threesfingertable(2) = {(8,0)}
-        threesfingertable(3) = {(12,0)}
+//        threesfingertable(0) = {(5,0)}
+//        threesfingertable(1) = {(6,0)}
+//        threesfingertable(2) = {(8,0)}
+//        threesfingertable(3) = {(12,0)}
 
 //        sixsfingertable(0) = {(7,0)}
 //        sixsfingertable(1) = {(0,0)}
 //        sixsfingertable(2) = {(2,3)}
-
-        NodeRef1 ! TestInit(3,4,zerossfingeratable,0)
-        NodeRef2 ! TestInit(4,0,onesfingertable,3)
-        NodeRef3 ! TestInit(0,3,threesfingertable,4)
+//
+//        NodeRef1 ! TestInit(3,3,zerossfingeratable,0)
+//        NodeRef2 ! TestInit(0,0,onesfingertable,3)
+//        NodeRef3 ! TestInit(0,3,threesfingertable,4)
 //        NodeRef4 ! TestInit(0,3,sixsfingertable,6)
 
 
-//        NodeRef1 ! NodeInit(0)
-//        NodeRef2 ! NodeInit(1)
-//        NodeRef3 ! NodeInit(3)
+        NodeRef1 ! NodeInit(0)
+        NodeRef2 ! NodeInit(3)
+        NodeRef3 ! NodeInit(4)
         NodeRef4 ! NodeInit(13)
 
 
@@ -966,9 +975,9 @@ object project3 {
 //          println("Joining Node : " + Nodes(1)._2.path.name + " and existing Node:  " + Nodes(2)._1)
 //        Thread.sleep(100000)
 
-
-        val join_future : Future[Join_response] = (Nodes(3)._2 ? Join(Nodes(0)._1)).mapTo[Join_response]
-        val join_result = Await.result(join_future,TimeoutDuration.duration)
+//
+//        val join_future : Future[Join_response] = (Nodes(2)._2 ? Join(Nodes(1)._1)).mapTo[Join_response]
+//        val join_result = Await.result(join_future,TimeoutDuration.duration)
 
         log.info("-------------------------")
 //        Thread.sleep(10000)
@@ -976,26 +985,27 @@ object project3 {
 
 //        }
 //
-//
-//        for(i <-0 until 4) {
-//
-//          if(i==0) {
-//
-//            val join_future : Future[Join_response] = (Nodes(i)._2 ? Join(-1)).mapTo[Join_response]
-//            val join_result = Await.result(join_future,TimeoutDuration.duration)
-//
-//          }
-//
-//          else {
 ////
+        for(i <-0 until 4) {
+
+          if(i==0) {
+
+            val join_future : Future[Join_response] = (Nodes(i)._2 ? Join(-1)).mapTo[Join_response]
+            val join_result = Await.result(join_future,TimeoutDuration.duration)
+
+          }
+
+          else {
+//
 //////            println("not new node")
-//            val join_future : Future[Join_response] = (Nodes(i)._2 ? Join(Nodes(i-1)._1)).mapTo[Join_response]
-//            val join_result = Await.result(join_future,TimeoutDuration.duration)
-//////            Nodes(i)._2 ! Join(Nodes(i-1)._1)
-//
-//          }
-//
-//       }
+            val join_future : Future[Join_response] = (Nodes(i)._2 ? Join(Nodes(i-1)._1)).mapTo[Join_response]
+            val join_result = Await.result(join_future,TimeoutDuration.duration)
+////            Nodes(i)._2 ! Join(Nodes(i-1)._1)
+
+          }
+
+       }
+        Thread.sleep(1000)
         for(i <-0 until 4) {
 
           val print_future: Future[Printresponse] = (Nodes(i)._2 ? Printrequest).mapTo[Printresponse]
